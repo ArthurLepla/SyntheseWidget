@@ -195,5 +195,291 @@
                 <description>Action à exécuter lors du clic sur un secteur dans le graphique d'air</description>
             </property>
         </propertyGroup>
+
+        <!-- Configuration DPE -->
+        <propertyGroup caption="Configuration DPE">
+            <!-- 1) Datasource pour lire l'objet DPESettings persistant -->
+            <property key="dsDPESettings" type="datasource" isList="true" required="true">
+                <caption>Source de données DPESettings</caption>
+                <description>Source pour charger l'objet contenant les seuils DPE actuellement sauvegardés.</description>
+            </property>
+
+            <!-- 2) Attributs pour lire les seuils sauvegardés (depuis dsDPESettings) -->
+            <!-- Jour -->
+            <property key="ThresholdA_Day" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé A (kWh/jour)</caption>
+                <description>Lecture Seuil A (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdB_Day" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé B (kWh/jour)</caption>
+                <description>Lecture Seuil B (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdC_Day" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé C (kWh/jour)</caption>
+                <description>Lecture Seuil C (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdD_Day" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé D (kWh/jour)</caption>
+                <description>Lecture Seuil D (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdE_Day" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé E (kWh/jour)</caption>
+                <description>Lecture Seuil E (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdF_Day" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé F (kWh/jour)</caption>
+                <description>Lecture Seuil F (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <!-- Semaine -->
+            <property key="ThresholdA_Week" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé A (kWh/semaine)</caption>
+                <description>Lecture Seuil A (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdB_Week" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé B (kWh/semaine)</caption>
+                <description>Lecture Seuil B (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdC_Week" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé C (kWh/semaine)</caption>
+                <description>Lecture Seuil C (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdD_Week" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé D (kWh/semaine)</caption>
+                <description>Lecture Seuil D (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdE_Week" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé E (kWh/semaine)</caption>
+                <description>Lecture Seuil E (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdF_Week" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé F (kWh/semaine)</caption>
+                <description>Lecture Seuil F (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <!-- Mois -->
+            <property key="ThresholdA_Month" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé A (kWh/mois)</caption>
+                <description>Lecture Seuil A (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdB_Month" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé B (kWh/mois)</caption>
+                <description>Lecture Seuil B (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdC_Month" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé C (kWh/mois)</caption>
+                <description>Lecture Seuil C (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdD_Month" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé D (kWh/mois)</caption>
+                <description>Lecture Seuil D (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdE_Month" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé E (kWh/mois)</caption>
+                <description>Lecture Seuil E (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdF_Month" type="attribute" dataSource="dsDPESettings" required="true">
+                <caption>Seuil Sauvegardé F (kWh/mois)</caption>
+                <description>Lecture Seuil F (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+
+            <!-- 3) Attributs Buffer (liés au contexte du DataView parent) -->
+            <!-- Jour -->
+            <property key="ThresholdA_Day_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil A (kWh/jour)</caption>
+                <description>Attribut du contexte pour éditer Seuil A (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdB_Day_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil B (kWh/jour)</caption>
+                <description>Attribut du contexte pour éditer Seuil B (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+             <property key="ThresholdC_Day_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil C (kWh/jour)</caption>
+                <description>Attribut du contexte pour éditer Seuil C (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdD_Day_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil D (kWh/jour)</caption>
+                <description>Attribut du contexte pour éditer Seuil D (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdE_Day_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil E (kWh/jour)</caption>
+                <description>Attribut du contexte pour éditer Seuil E (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdF_Day_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil F (kWh/jour)</caption>
+                <description>Attribut du contexte pour éditer Seuil F (Jour)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <!-- Semaine -->
+             <property key="ThresholdA_Week_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil A (kWh/semaine)</caption>
+                <description>Attribut du contexte pour éditer Seuil A (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdB_Week_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil B (kWh/semaine)</caption>
+                <description>Attribut du contexte pour éditer Seuil B (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdC_Week_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil C (kWh/semaine)</caption>
+                <description>Attribut du contexte pour éditer Seuil C (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdD_Week_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil D (kWh/semaine)</caption>
+                <description>Attribut du contexte pour éditer Seuil D (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdE_Week_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil E (kWh/semaine)</caption>
+                <description>Attribut du contexte pour éditer Seuil E (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdF_Week_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil F (kWh/semaine)</caption>
+                <description>Attribut du contexte pour éditer Seuil F (Semaine)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+             <!-- Mois -->
+            <property key="ThresholdA_Month_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil A (kWh/mois)</caption>
+                <description>Attribut du contexte pour éditer Seuil A (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdB_Month_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil B (kWh/mois)</caption>
+                <description>Attribut du contexte pour éditer Seuil B (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdC_Month_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil C (kWh/mois)</caption>
+                <description>Attribut du contexte pour éditer Seuil C (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdD_Month_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil D (kWh/mois)</caption>
+                <description>Attribut du contexte pour éditer Seuil D (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdE_Month_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil E (kWh/mois)</caption>
+                <description>Attribut du contexte pour éditer Seuil E (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+            <property key="ThresholdF_Month_Form" type="attribute" required="true">
+                <caption>Formulaire Seuil F (kWh/mois)</caption>
+                <description>Attribut du contexte pour éditer Seuil F (Mois)</description>
+                <attributeTypes>
+                    <attributeType name="Decimal"/>
+                </attributeTypes>
+            </property>
+
+            <!-- 4) Actions -->
+            <property key="prepareAndSaveDPESettingsMF" type="action" required="true">
+                <caption>Microflow Préparer et Sauvegarder DPESettings</caption>
+                <description>Microflow qui reçoit l'objet du contexte (avec les valeurs _Form), et met à jour l'objet DPESetting persistant.</description>
+            </property>
+            <!-- Les actions load et save originales peuvent être supprimées si prepareAndSave fait tout -->
+             <property key="loadDPESettingsMF" type="action" required="false">
+                 <caption>(Optionnel) Microflow Charger DPESettings</caption>
+                 <description>Peut être utilisé par la source dsDPESettings pour charger l'objet.</description>
+             </property>
+            <property key="saveDPESettingsMF" type="action" required="false">
+                <caption>(Optionnel/Obsolète) Microflow Sauvegarder DPESettings</caption>
+                <description>Action de sauvegarde directe, probablement plus nécessaire.</description>
+            </property>
+        </propertyGroup>
     </properties>
 </widget>

@@ -1,10 +1,10 @@
-import React, { ReactElement, createElement, useEffect, useState } from "react";
+import React, { ReactElement, createElement, useEffect, useState, useMemo } from "react";
 import { Big } from "big.js";
+import { ListAttributeValue} from "mendix";
 import { SyntheseWidgetContainerProps } from "../typings/SyntheseWidgetProps";
 import { CardConsoTotal } from "./components/CardConsoTotal";
-import { ColumnChart } from "./components/ColumnChart";
+import { ColumnChart, SecteurData } from "./components/ColumnChart";
 import { SecteurConsoCard } from "./components/SecteurConsoCard";
-import { SecteurData } from "./components/ColumnChart";
 import { DPE } from "./components/DPE";
 import { DateRangeSelector } from "./components/DateRangeSelector";
 import { LoadingOverlay } from "./components/LoadingOverlay";
@@ -12,6 +12,23 @@ import { LoadingService } from "./components/services/LoadingService";
 
 import "./ui/SyntheseWidget.css";
 import "./styles/loader.css";
+import "./styles/dialog-animations.css";
+
+// Define the specific type for threshold keys based on the naming pattern
+type OriginalThresholdKey = Extract<keyof SyntheseWidgetContainerProps, `Threshold${string}_${'Day'|'Week'|'Month'}`>;
+
+// Helper array defined outside the component or imported, now using the specific type
+const ORIGINAL_THRESHOLD_KEYS: OriginalThresholdKey[] = [
+    "ThresholdA_Day", "ThresholdB_Day", "ThresholdC_Day", "ThresholdD_Day", "ThresholdE_Day", "ThresholdF_Day",
+    "ThresholdA_Week", "ThresholdB_Week", "ThresholdC_Week", "ThresholdD_Week", "ThresholdE_Week", "ThresholdF_Week",
+    "ThresholdA_Month", "ThresholdB_Month", "ThresholdC_Month", "ThresholdD_Month", "ThresholdE_Month", "ThresholdF_Month"
+];
+// Helper constant defined outside the component or imported
+const DEFAULT_THRESHOLDS: Record<string, number> = {
+    ThresholdA_Day: 200, ThresholdB_Day: 400, ThresholdC_Day: 600, ThresholdD_Day: 800, ThresholdE_Day: 1000, ThresholdF_Day: 1200,
+    ThresholdA_Week: 1400, ThresholdB_Week: 2800, ThresholdC_Week: 4200, ThresholdD_Week: 5600, ThresholdE_Week: 7000, ThresholdF_Week: 8400,
+    ThresholdA_Month: 6000, ThresholdB_Month: 12000, ThresholdC_Month: 18000, ThresholdD_Month: 24000, ThresholdE_Month: 30000, ThresholdF_Month: 36000,
+};
 
 export function SyntheseWidget({
     dsUsine,
@@ -41,7 +58,45 @@ export function SyntheseWidget({
     onClickSecteurElec,
     onClickSecteurGaz,
     onClickSecteurEau,
-    onClickSecteurAir
+    onClickSecteurAir,
+    dsDPESettings,
+    ThresholdA_Day,
+    ThresholdB_Day,
+    ThresholdC_Day,
+    ThresholdD_Day,
+    ThresholdE_Day,
+    ThresholdF_Day,
+    ThresholdA_Week,
+    ThresholdB_Week,
+    ThresholdC_Week,
+    ThresholdD_Week,
+    ThresholdE_Week,
+    ThresholdF_Week,
+    ThresholdA_Month,
+    ThresholdB_Month,
+    ThresholdC_Month,
+    ThresholdD_Month,
+    ThresholdE_Month,
+    ThresholdF_Month,
+    ThresholdA_Day_Form,
+    ThresholdB_Day_Form,
+    ThresholdC_Day_Form,
+    ThresholdD_Day_Form,
+    ThresholdE_Day_Form,
+    ThresholdF_Day_Form,
+    ThresholdA_Week_Form,
+    ThresholdB_Week_Form,
+    ThresholdC_Week_Form,
+    ThresholdD_Week_Form,
+    ThresholdE_Week_Form,
+    ThresholdF_Week_Form,
+    ThresholdA_Month_Form,
+    ThresholdB_Month_Form,
+    ThresholdC_Month_Form,
+    ThresholdD_Month_Form,
+    ThresholdE_Month_Form,
+    ThresholdF_Month_Form,
+    prepareAndSaveDPESettingsMF
 }: SyntheseWidgetContainerProps): ReactElement {
     const [usineData, setUsineData] = useState<{
         consoElec: Big;
@@ -205,43 +260,70 @@ export function SyntheseWidget({
         }
     };
 
-    // Calcul du grade DPE basé sur la consommation électrique
-    const calculateDPEGrade = (value: number, period: 'day' | 'week' | 'month'): 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' => {
-        // Définir les seuils de base pour une journée
-        const dailyThresholds = {
-            A: 200,    // <= 200 kWh/jour
-            B: 400,    // 201-400 kWh/jour
-            C: 600,    // 401-600 kWh/jour
-            D: 800,    // 601-800 kWh/jour
-            E: 1000,   // 801-1000 kWh/jour
-            F: 1200    // 1001-1200 kWh/jour
-                       // > 1200 kWh/jour = G
+    // calculateDPEGrade function using useMemo
+    const calculateDPEGrade = useMemo((): (value: number, period: 'day' | 'week' | 'month') => 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' => {
+        const settingsObj = dsDPESettings?.status === "available" && dsDPESettings.items && dsDPESettings.items.length > 0
+            ? dsDPESettings.items[0]
+            : undefined;
+
+        const currentThresholds: Record<string, number> = {};
+        // Create a map of threshold props for easier access inside the loop
+        // Explicitly type the map using OriginalThresholdKey and ListAttributeValue
+        const thresholdProps: Record<OriginalThresholdKey, ListAttributeValue<Big>> = {
+            ThresholdA_Day, ThresholdB_Day, ThresholdC_Day, ThresholdD_Day, ThresholdE_Day, ThresholdF_Day,
+            ThresholdA_Week, ThresholdB_Week, ThresholdC_Week, ThresholdD_Week, ThresholdE_Week, ThresholdF_Week,
+            ThresholdA_Month, ThresholdB_Month, ThresholdC_Month, ThresholdD_Month, ThresholdE_Month, ThresholdF_Month
         };
 
-        // Calculer le multiplicateur en fonction de la période
-        const multiplier = period === 'day' ? 1 : 
-                          period === 'week' ? 7 : 
-                          30; // pour un mois
+        if (settingsObj) {
+            ORIGINAL_THRESHOLD_KEYS.forEach(key => {
+                // Access the prop using the correctly typed key - no error expected here now
+                const attr = thresholdProps[key];
+                if (attr) {
+                    const editableValue = attr.get(settingsObj);
+                    const bigValue = editableValue?.value;
+                    currentThresholds[key] = bigValue instanceof Big ? bigValue.toNumber() : DEFAULT_THRESHOLDS[key];
+                } else {
+                     // This case should theoretically not happen if keys match props
+                    currentThresholds[key] = DEFAULT_THRESHOLDS[key];
+                }
+            });
+        } else {
+            ORIGINAL_THRESHOLD_KEYS.forEach(key => {
+                currentThresholds[key] = DEFAULT_THRESHOLDS[key];
+            });
+        }
 
-        // Calculer les seuils ajustés
-        const adjustedThresholds = {
-            A: dailyThresholds.A * multiplier,
-            B: dailyThresholds.B * multiplier,
-            C: dailyThresholds.C * multiplier,
-            D: dailyThresholds.D * multiplier,
-            E: dailyThresholds.E * multiplier,
-            F: dailyThresholds.F * multiplier
+        // Return the calculation function
+        return (value: number, period: 'day' | 'week' | 'month'): 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' => {
+            const periodSuffix = period === 'day' ? 'Day' : period === 'week' ? 'Week' : 'Month';
+            const getThreshold = (grade: string): number => {
+                const key = `Threshold${grade}_${periodSuffix}`;
+                return currentThresholds[key] ?? DEFAULT_THRESHOLDS[key];
+            };
+
+            const thresholds = {
+                A: getThreshold('A'), B: getThreshold('B'), C: getThreshold('C'),
+                D: getThreshold('D'), E: getThreshold('E'), F: getThreshold('F'),
+            };
+
+            if (value <= thresholds.A) return 'A';
+            if (value <= thresholds.B) return 'B';
+            if (value <= thresholds.C) return 'C';
+            if (value <= thresholds.D) return 'D';
+            if (value <= thresholds.E) return 'E';
+            if (value <= thresholds.F) return 'F';
+            return 'G';
         };
+    // *** Correction: Dependency array uses the destructured props directly ***
+    }, [
+        dsDPESettings,
+        ThresholdA_Day, ThresholdB_Day, ThresholdC_Day, ThresholdD_Day, ThresholdE_Day, ThresholdF_Day,
+        ThresholdA_Week, ThresholdB_Week, ThresholdC_Week, ThresholdD_Week, ThresholdE_Week, ThresholdF_Week,
+        ThresholdA_Month, ThresholdB_Month, ThresholdC_Month, ThresholdD_Month, ThresholdE_Month, ThresholdF_Month
+    ]);
 
-        // Déterminer le grade en fonction de la valeur
-        if (value <= adjustedThresholds.A) return 'A';
-        if (value <= adjustedThresholds.B) return 'B';
-        if (value <= adjustedThresholds.C) return 'C';
-        if (value <= adjustedThresholds.D) return 'D';
-        if (value <= adjustedThresholds.E) return 'E';
-        if (value <= adjustedThresholds.F) return 'F';
-        return 'G';
-    };
+    const currentGrade = calculateDPEGrade(usineData.consoElec.toNumber(), activePeriod);
 
     return (
         <React.Fragment>
@@ -264,8 +346,46 @@ export function SyntheseWidget({
 
                 {/* DPE */}
                 <div>
-                    <DPE 
-                        grade={calculateDPEGrade(usineData.consoElec.toNumber(), activePeriod)}
+                    <DPE
+                        dsDPESettings={dsDPESettings}
+                        ThresholdA_Day={ThresholdA_Day}
+                        ThresholdB_Day={ThresholdB_Day}
+                        ThresholdC_Day={ThresholdC_Day}
+                        ThresholdD_Day={ThresholdD_Day}
+                        ThresholdE_Day={ThresholdE_Day}
+                        ThresholdF_Day={ThresholdF_Day}
+                        ThresholdA_Week={ThresholdA_Week}
+                        ThresholdB_Week={ThresholdB_Week}
+                        ThresholdC_Week={ThresholdC_Week}
+                        ThresholdD_Week={ThresholdD_Week}
+                        ThresholdE_Week={ThresholdE_Week}
+                        ThresholdF_Week={ThresholdF_Week}
+                        ThresholdA_Month={ThresholdA_Month}
+                        ThresholdB_Month={ThresholdB_Month}
+                        ThresholdC_Month={ThresholdC_Month}
+                        ThresholdD_Month={ThresholdD_Month}
+                        ThresholdE_Month={ThresholdE_Month}
+                        ThresholdF_Month={ThresholdF_Month}
+                        ThresholdA_Day_Form={ThresholdA_Day_Form}
+                        ThresholdB_Day_Form={ThresholdB_Day_Form}
+                        ThresholdC_Day_Form={ThresholdC_Day_Form}
+                        ThresholdD_Day_Form={ThresholdD_Day_Form}
+                        ThresholdE_Day_Form={ThresholdE_Day_Form}
+                        ThresholdF_Day_Form={ThresholdF_Day_Form}
+                        ThresholdA_Week_Form={ThresholdA_Week_Form}
+                        ThresholdB_Week_Form={ThresholdB_Week_Form}
+                        ThresholdC_Week_Form={ThresholdC_Week_Form}
+                        ThresholdD_Week_Form={ThresholdD_Week_Form}
+                        ThresholdE_Week_Form={ThresholdE_Week_Form}
+                        ThresholdF_Week_Form={ThresholdF_Week_Form}
+                        ThresholdA_Month_Form={ThresholdA_Month_Form}
+                        ThresholdB_Month_Form={ThresholdB_Month_Form}
+                        ThresholdC_Month_Form={ThresholdC_Month_Form}
+                        ThresholdD_Month_Form={ThresholdD_Month_Form}
+                        ThresholdE_Month_Form={ThresholdE_Month_Form}
+                        ThresholdF_Month_Form={ThresholdF_Month_Form}
+                        prepareAndSaveDPESettingsMF={prepareAndSaveDPESettingsMF}
+                        grade={currentGrade}
                         value={usineData.consoElec.toNumber()}
                         period={activePeriod}
                     />

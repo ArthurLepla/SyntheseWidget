@@ -47,13 +47,13 @@ const demoData = {
     ]
 };
 
-export function preview({ class: className }: SyntheseWidgetPreviewProps): ReactElement {
+export function preview({ class: className, styleObject }: SyntheseWidgetPreviewProps): ReactElement {
     const [activeButton, setActiveButton] = useState<'day' | 'week' | 'month'>('day');
     const dpeValue = demoData.usine.consoElec.toNumber();
     const dpeGrade = calculateDPEGrade(dpeValue, activeButton);
 
     return (
-        <div className={className}>
+        <div className={className} style={styleObject}>
             <div className="mb-6">
                 <DateRangeSelector
                     onClickDay={() => setActiveButton('day')}
@@ -104,6 +104,44 @@ export function preview({ class: className }: SyntheseWidgetPreviewProps): React
                     value={dpeValue}
                     grade={dpeGrade}
                     period={activeButton}
+                    dsDPESettings={{ status: "available", items: [] } as any}
+                    ThresholdA_Day={{} as any}
+                    ThresholdB_Day={{} as any}
+                    ThresholdC_Day={{} as any}
+                    ThresholdD_Day={{} as any}
+                    ThresholdE_Day={{} as any}
+                    ThresholdF_Day={{} as any}
+                    ThresholdA_Week={{} as any}
+                    ThresholdB_Week={{} as any}
+                    ThresholdC_Week={{} as any}
+                    ThresholdD_Week={{} as any}
+                    ThresholdE_Week={{} as any}
+                    ThresholdF_Week={{} as any}
+                    ThresholdA_Month={{} as any}
+                    ThresholdB_Month={{} as any}
+                    ThresholdC_Month={{} as any}
+                    ThresholdD_Month={{} as any}
+                    ThresholdE_Month={{} as any}
+                    ThresholdF_Month={{} as any}
+                    ThresholdA_Day_Form={{} as any}
+                    ThresholdB_Day_Form={{} as any}
+                    ThresholdC_Day_Form={{} as any}
+                    ThresholdD_Day_Form={{} as any}
+                    ThresholdE_Day_Form={{} as any}
+                    ThresholdF_Day_Form={{} as any}
+                    ThresholdA_Week_Form={{} as any}
+                    ThresholdB_Week_Form={{} as any}
+                    ThresholdC_Week_Form={{} as any}
+                    ThresholdD_Week_Form={{} as any}
+                    ThresholdE_Week_Form={{} as any}
+                    ThresholdF_Week_Form={{} as any}
+                    ThresholdA_Month_Form={{} as any}
+                    ThresholdB_Month_Form={{} as any}
+                    ThresholdC_Month_Form={{} as any}
+                    ThresholdD_Month_Form={{} as any}
+                    ThresholdE_Month_Form={{} as any}
+                    ThresholdF_Month_Form={{} as any}
+                    prepareAndSaveDPESettingsMF={undefined}
                 />
             </div>
 
