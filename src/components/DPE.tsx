@@ -1,7 +1,9 @@
 import { ReactElement, createElement, useState, useEffect, ChangeEvent, useMemo } from "react";
-import { Gauge, Settings, X } from "lucide-react";
+import { Gauge, X } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Big } from "big.js";
+import { ActionIcon } from '@mantine/core';
+import { IconSettings } from '@tabler/icons-react';
 // Import necessary Mendix types
 import { ListAttributeValue, EditableValue, ObjectItem } from "mendix";
 
@@ -77,8 +79,7 @@ const getGradeRanges = (period: 'day' | 'week' | 'month', currentThresholds: Rec
     const unit = period === 'day' ? 'kWh/jour' : period === 'week' ? 'kWh/semaine' : 'kWh/mois';
 
     const getThreshold = (grade: string): number => {
-        const key = `Threshold${grade}_${periodSuffix}`; // Construct original key
-        // Use the passed threshold or fall back to default
+        const key = `Threshold${grade}_${periodSuffix}`;
         return currentThresholds[key] ?? DEFAULT_THRESHOLDS[key];
     };
 
@@ -95,14 +96,15 @@ const getGradeRanges = (period: 'day' | 'week' | 'month', currentThresholds: Rec
         return `${lowNum + 1}-${highNum} ${unit}`;
     };
 
+    // Largeurs adaptées - en commençant par 20% pour A
     return {
-        A: { color: '#319834', range: formatRange(undefined, thresholds.A), label: 'Très performant', width: '30%' },
-        B: { color: '#33CC33', range: formatRange(thresholds.A, thresholds.B), label: 'Performant', width: '40%' },
+        A: { color: '#319834', range: formatRange(undefined, thresholds.A), label: 'Très performant', width: '20%' },
+        B: { color: '#33CC33', range: formatRange(thresholds.A, thresholds.B), label: 'Performant', width: '35%' },
         C: { color: '#CBEF43', range: formatRange(thresholds.B, thresholds.C), label: 'Assez performant', width: '50%', textColor: '#666666' },
-        D: { color: '#FFF833', range: formatRange(thresholds.C, thresholds.D), label: 'Peu performant', width: '60%', textColor: '#666666' },
-        E: { color: '#FDD733', range: formatRange(thresholds.D, thresholds.E), label: 'Peu performant', width: '70%', textColor: '#666666' },
-        F: { color: '#FF9234', range: formatRange(thresholds.E, thresholds.F), label: 'Très peu performant', width: '80%' },
-        G: { color: '#FF4234', range: formatRange(thresholds.F, undefined), label: 'Non performant', width: '90%' }
+        D: { color: '#FFF833', range: formatRange(thresholds.C, thresholds.D), label: 'Peu performant', width: '65%', textColor: '#666666' },
+        E: { color: '#FDD733', range: formatRange(thresholds.D, thresholds.E), label: 'Peu performant', width: '80%', textColor: '#666666' },
+        F: { color: '#FF9234', range: formatRange(thresholds.E, thresholds.F), label: 'Très peu performant', width: '90%' },
+        G: { color: '#FF4234', range: formatRange(thresholds.F, undefined), label: 'Non performant', width: '100%' }
     };
 };
 
@@ -120,7 +122,6 @@ export const DPE = (props: DPEProps): ReactElement => {
 
     // Get the Mendix object from the dsDPESettings datasource (for reading saved thresholds)
     const dpeSettingsObject = useMemo((): DPESettingsObject => {
-        // Use the correct datasource prop name now 'dsDPESettings'
         return dsDPESettings?.status === "available" && dsDPESettings.items && dsDPESettings.items.length > 0
             ? dsDPESettings.items[0]
             : undefined;
@@ -250,12 +251,34 @@ export const DPE = (props: DPEProps): ReactElement => {
             }
         });
 
-        // TODO: Add validation for increasing thresholds (A < B < C...)
+        // Vérification de la progression des seuils (A < B < C < D < E < F)
+        (['Day', 'Week', 'Month'] as const).forEach(period => { // Use 'as const' for type safety
+            const grades = ['A', 'B', 'C', 'D', 'E', 'F'];
+            const periodLabel = period === 'Day' ? 'Jour' : period === 'Week' ? 'Semaine' : 'Mois'; // Get label once
+
+            for (let i = 0; i < grades.length - 1; i++) {
+                const currentGrade = grades[i];
+                const nextGrade = grades[i + 1];
+
+                const currentKey = `Threshold${currentGrade}_${period}_Form` as FormThresholdKey;
+                const nextKey = `Threshold${nextGrade}_${period}_Form` as FormThresholdKey;
+
+                const currentValue = validatedFormValues[currentKey];
+                const nextValue = validatedFormValues[nextKey];
+
+                // Check only if both values are valid Big numbers
+                if (currentValue && nextValue && currentValue.gte(nextValue)) { // gte means >=
+                    validationErrors.push(
+                        `Période ${periodLabel}: Le seuil ${nextGrade} (${nextValue.toFixed()}) doit être strictement supérieur au seuil ${currentGrade} (${currentValue.toFixed()}).` // Use toFixed() for clearer error message
+                    );
+                }
+            }
+        });
 
         if (validationErrors.length > 0) {
             setSaveError(`Erreurs de validation:\n- ${validationErrors.join("\n- ")}`);
             setIsSaving(false);
-            return;
+            return; // Exit if validation fails
         }
 
         // 2. Update Context Object Attributes (_Form props)
@@ -331,16 +354,19 @@ export const DPE = (props: DPEProps): ReactElement => {
     return (
         <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <div className="card-base relative">
-                {/* Settings Button: Disable if action unavailable OR if form attributes missing */}
+                {/* Settings Button: Using Mantine ActionIcon */}
                 <Dialog.Trigger asChild>
-                    <button
+                    <ActionIcon
+                        variant="default" // Mantine variant (can be adjusted)
+                        size={64} // Increased size again
                         title="Configurer les seuils DPE"
-                        className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                         aria-label="Configurer les seuils DPE"
                         disabled={!props.prepareAndSaveDPESettingsMF?.canExecute || !formAttrsAvailable}
+                        className="absolute top-2 right-2 z-10" // Keep absolute positioning AND ADD z-index
+                        // onClick={() => setIsDialogOpen(true)} // Alternative if asChild doesn't work
                     >
-                        <Settings className="w-7 h-7 text-gray-600" />
-                    </button>
+                        <IconSettings style={{ width: '70%', height: '70%' }} />
+                    </ActionIcon>
                 </Dialog.Trigger>
 
                 {/* Header */}
@@ -352,24 +378,47 @@ export const DPE = (props: DPEProps): ReactElement => {
                 </div>
 
                 {/* DPE Bars (using DPE_GRADES calculated from saved thresholds) */}
-                <div className="mt-8">
+                <div className="mt-8 relative">
+                    {/* Ligne de référence verticale */}
+                    <div className="absolute left-8 top-0 bottom-0 w-px bg-gray-200 z-0"></div>
+
                     {Object.entries(DPE_GRADES).map(([key, { color, range, label, width, textColor }]) => {
                         const isActiveGrade = key === grade;
                         return (
-                            <div key={key} className="flex mb-3 items-center">
+                            <div key={key} className="flex mb-3 items-center relative z-10">
                                 <div className="w-8 text-xl font-bold flex items-center justify-center mr-4">{key}</div>
                                 <div className="flex-1 flex items-center">
                                     <div
-                                        style={{ backgroundColor: color, width: width }}
-                                        className="h-12 rounded-lg flex items-center justify-between px-4 flex-grow"
+                                        style={{
+                                            backgroundColor: color,
+                                            width: width,
+                                            borderTopRightRadius: '6px',
+                                            borderBottomRightRadius: '6px',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                        }}
+                                        className="h-12 flex items-center justify-between px-4"
                                     >
-                                        <span className="font-medium text-lg whitespace-nowrap" style={{ color: textColor || 'white' }}>{label}</span>
-                                        <span className="font-medium text-lg whitespace-nowrap ml-4" style={{ color: textColor || 'white' }}>{range}</span>
+                                        {/* Pour les barres plus courtes, minimiser le texte */}
+                                        <span 
+                                            className={`font-medium whitespace-nowrap ${key === 'A' ? 'text-2xl' : 'text-2xl'}`} 
+                                            style={{ color: textColor || 'white' }}
+                                        >
+                                            {label}
+                                        </span>
+                                        
+                                        {/* Réduire la taille du texte pour les barres courtes */}
+                                        <span 
+                                            className={`font-medium whitespace-nowrap ml-2 ${key === 'A' || key === 'B' ? 'text-2xl' : 'text-2xl'}`} 
+                                            style={{ color: textColor || 'white' }}
+                                        >
+                                            {range}
+                                        </span>
                                     </div>
+                                    
                                     {isActiveGrade && (
                                         <div
                                             style={{ color: color, border: `2px solid ${color}`, backgroundColor: 'white', marginLeft: '12px' }}
-                                            className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-bold shadow-md flex-shrink-0"
+                                            className="inline-flex items-center rounded-full px-3 py-1.5 text-2xl font-bold shadow-md flex-shrink-0"
                                         >
                                             <div
                                                 style={{ backgroundColor: color, width: '10px', height: '10px', borderRadius: '50%', marginRight: '6px' }}
@@ -390,85 +439,90 @@ export const DPE = (props: DPEProps): ReactElement => {
 
             {/* Dialog Content */}
             <Dialog.Portal>
-                 <Dialog.Overlay className="fixed inset-0 bg-black/50 data-[state=open]:animate-overlayShow z-40" />
-                 <Dialog.Content className="fixed top-1/2 left-1/2 max-h-[85vh] w-[90vw] max-w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-lg focus:outline-none data-[state=open]:animate-contentShow overflow-y-auto z-50">
-                    <Dialog.Title className="text-xl font-semibold mb-4 text-gray-800">
-                        Configurer les Seuils DPE
-                    </Dialog.Title>
-                    <Dialog.Description className="text-sm text-gray-600 mb-6">
-                        Entrez les valeurs maximales (en kWh) pour chaque grade et période. Le grade G correspondra à toute valeur supérieure au seuil F. Ces valeurs seront mises à jour dans le contexte Mendix.
-                    </Dialog.Description>
+                 <Dialog.Overlay className="fixed inset-0 bg-black/50 data-[state=open]:animate-overlayShow z-[900]" />
+                 <Dialog.Content
+                     className="fixed inset-0 flex items-center justify-center z-[1000]"
+                     style={{ maxHeight: "100vh", overflow: "auto" }}
+                 >
+                     <div className="relative bg-white rounded-lg p-6 shadow-xl w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto m-4 data-[state=open]:animate-contentShow">
+                         <Dialog.Title className="text-3xl font-semibold mb-4 text-gray-800">
+                             Configurer les Seuils DPE
+                         </Dialog.Title>
+                         <Dialog.Description className="text-lg text-gray-600 mb-6">
+                             Entrez les valeurs maximales (en kWh) pour chaque grade et période. Le grade G correspondra à toute valeur supérieure au seuil F. Ces valeurs seront mises à jour dans le contexte Mendix.
+                         </Dialog.Description>
 
-                    {/* Form: Conditionally render based on formAttrsAvailable */}
-                    {formAttrsAvailable ? (
-                        <form onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }}>
-                            {/* Save Error Display */}
-                            {saveError && (
-                                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                                    <p className="font-bold">Erreur de sauvegarde</p>
-                                    <pre className="whitespace-pre-wrap text-sm">{saveError}</pre>
-                                </div>
-                            )}
-                            {/* Form Fields Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {(['Day', 'Week', 'Month'] as const).map(p => (
-                                    <fieldset key={p} className="border p-4 rounded">
-                                        <legend className="font-medium px-1">Par {p === 'Day' ? 'Jour' : p === 'Week' ? 'Semaine' : 'Mois'} (kWh/{p === 'Day' ? 'jour' : p === 'Week' ? 'semaine' : 'mois'})</legend>
-                                        {["A", "B", "C", "D", "E", "F"].map(g => {
-                                            const formKey = `Threshold${g}_${p}_Form` as FormThresholdKey;
-                                            return (
-                                                <div key={formKey} className="mb-3">
-                                                    <label htmlFor={formKey} className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Seuil Max Grade {g}
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        id={formKey}
-                                                        name={formKey}
-                                                        value={formSettings[formKey] ?? ''}
-                                                        onChange={handleFormInputChange}
-                                                        className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-                                                        step="any"
-                                                        min="0"
-                                                        required
-                                                    />
-                                                </div>
-                                            );
-                                        })}
-                                    </fieldset>
-                                ))}
-                            </div>
-                            {/* Action Buttons */}
-                            <div className="mt-8 flex justify-end space-x-3">
-                                <Dialog.Close asChild>
-                                    <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                        Annuler
-                                    </button>
-                                </Dialog.Close>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                                    disabled={!props.prepareAndSaveDPESettingsMF?.canExecute || isSaving}
-                                >
-                                    {isSaving ? "Sauvegarde..." : "Sauvegarder les modifications"}
-                                </button>
-                            </div>
-                        </form>
-                    ) : (
-                        // Show error message within the dialog if form attributes are not available
-                        <div className="text-center text-red-500 p-4 border border-red-300 rounded bg-red-50">
-                            Le formulaire de configuration DPE ne peut pas être chargé. <br/>
-                            Vérifiez que les attributs de formulaire (ex: ThresholdA_Day_Form) sont correctement configurés dans le widget et disponibles dans le contexte Mendix.
-                        </div>
-                    )}
+                         {/* Form: Conditionally render based on formAttrsAvailable */}
+                         {formAttrsAvailable ? (
+                             <form onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }}>
+                                 {/* Save Error Display */}
+                                 {saveError && (
+                                     <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-lg">
+                                         <p className="font-bold">Erreur de sauvegarde</p>
+                                         <pre className="whitespace-pre-wrap text-lg">{saveError}</pre>
+                                     </div>
+                                 )}
+                                 {/* Form Fields Grid */}
+                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                     {(['Day', 'Week', 'Month'] as const).map(p => (
+                                         <fieldset key={p} className="border p-4 rounded">
+                                             <legend className="font-medium px-1 text-xl">Par {p === 'Day' ? 'Jour' : p === 'Week' ? 'Semaine' : 'Mois'} (kWh/{p === 'Day' ? 'jour' : p === 'Week' ? 'semaine' : 'mois'})</legend>
+                                             {["A", "B", "C", "D", "E", "F"].map(g => {
+                                                 const formKey = `Threshold${g}_${p}_Form` as FormThresholdKey;
+                                                 return (
+                                                     <div key={formKey} className="mb-3">
+                                                         <label htmlFor={formKey} className="block text-lg font-medium text-gray-700 mb-1">
+                                                             Seuil Max Grade {g}
+                                                         </label>
+                                                         <input
+                                                             type="number"
+                                                             id={formKey}
+                                                             name={formKey}
+                                                             value={formSettings[formKey] ?? ''}
+                                                             onChange={handleFormInputChange}
+                                                             className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-lg p-2"
+                                                             step="any"
+                                                             min="0"
+                                                             required
+                                                         />
+                                                     </div>
+                                                 );
+                                             })}
+                                         </fieldset>
+                                     ))}
+                                 </div>
+                                 {/* Action Buttons */}
+                                 <div className="mt-8 flex justify-end space-x-3">
+                                     <Dialog.Close asChild>
+                                         <button type="button" className="px-4 py-2 text-lg font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                             Annuler
+                                         </button>
+                                     </Dialog.Close>
+                                     <button
+                                         type="submit"
+                                         className="px-4 py-2 text-lg font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                                         disabled={!props.prepareAndSaveDPESettingsMF?.canExecute || isSaving}
+                                     >
+                                         {isSaving ? "Sauvegarde..." : "Sauvegarder les modifications"}
+                                     </button>
+                                 </div>
+                             </form>
+                         ) : (
+                             // Show error message within the dialog if form attributes are not available
+                             <div className="text-center text-red-500 p-4 border border-red-300 rounded bg-red-50 text-lg">
+                                 Le formulaire de configuration DPE ne peut pas être chargé. <br/>
+                                 Vérifiez que les attributs de formulaire (ex: ThresholdA_Day_Form) sont correctement configurés dans le widget et disponibles dans le contexte Mendix.
+                             </div>
+                         )}
 
-                    {/* Close Button */}
-                    <Dialog.Close asChild>
-                        <button className="absolute top-3 right-3 p-1 rounded-full text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" aria-label="Fermer">
-                            <X className="w-5 h-5" />
-                        </button>
-                    </Dialog.Close>
-                </Dialog.Content>
+                         {/* Close Button (Moved Inside the new div) */}
+                         <Dialog.Close asChild>
+                             <button className="absolute top-3 right-3 p-1 rounded-full text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" aria-label="Fermer">
+                                 <X className="w-5 h-5" />
+                             </button>
+                         </Dialog.Close>
+                     </div>
+                 </Dialog.Content>
             </Dialog.Portal>
         </Dialog.Root>
     );

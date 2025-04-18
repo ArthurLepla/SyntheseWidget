@@ -1,6 +1,7 @@
 module.exports = {
-    plugins: {
-        tailwindcss: {},
-        autoprefixer: {},
-    },
+    plugins: [
+        require('postcss-preset-mantine'),
+        require('tailwindcss'),
+        require('autoprefixer'),
+    ],
 }; 

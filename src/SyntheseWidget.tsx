@@ -1,6 +1,7 @@
 import React, { ReactElement, createElement, useEffect, useState, useMemo } from "react";
 import { Big } from "big.js";
 import { ListAttributeValue} from "mendix";
+import { MantineProvider } from '@mantine/core';
 import { SyntheseWidgetContainerProps } from "../typings/SyntheseWidgetProps";
 import { CardConsoTotal } from "./components/CardConsoTotal";
 import { ColumnChart, SecteurData } from "./components/ColumnChart";
@@ -326,152 +327,154 @@ export function SyntheseWidget({
     const currentGrade = calculateDPEGrade(usineData.consoElec.toNumber(), activePeriod);
 
     return (
-        <React.Fragment>
-            {/* LoadingOverlay positioned outside the main content flow */}
-            <LoadingOverlay isLoading={isLoading} message={message} />
-            
-            {/* Main content */}
-            <div className="syntheseWidget-root max-w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 font-sans space-y-6 sm:space-y-8 lg:space-y-10">
-                {/* Date controls */}
-                <div>
-                    <DateRangeSelector
-                        onClickDay={() => handleDateRangeChange('day')}
-                        onClickWeek={() => handleDateRangeChange('week')}
-                        onClickMonth={() => handleDateRangeChange('month')}
-                        activeButton={activePeriod}
-                        dateDebut={dateDebut.value}
-                        dateFin={dateFin.value}
-                    />
-                </div>
-
-                {/* DPE */}
-                <div>
-                    <DPE
-                        dsDPESettings={dsDPESettings}
-                        ThresholdA_Day={ThresholdA_Day}
-                        ThresholdB_Day={ThresholdB_Day}
-                        ThresholdC_Day={ThresholdC_Day}
-                        ThresholdD_Day={ThresholdD_Day}
-                        ThresholdE_Day={ThresholdE_Day}
-                        ThresholdF_Day={ThresholdF_Day}
-                        ThresholdA_Week={ThresholdA_Week}
-                        ThresholdB_Week={ThresholdB_Week}
-                        ThresholdC_Week={ThresholdC_Week}
-                        ThresholdD_Week={ThresholdD_Week}
-                        ThresholdE_Week={ThresholdE_Week}
-                        ThresholdF_Week={ThresholdF_Week}
-                        ThresholdA_Month={ThresholdA_Month}
-                        ThresholdB_Month={ThresholdB_Month}
-                        ThresholdC_Month={ThresholdC_Month}
-                        ThresholdD_Month={ThresholdD_Month}
-                        ThresholdE_Month={ThresholdE_Month}
-                        ThresholdF_Month={ThresholdF_Month}
-                        ThresholdA_Day_Form={ThresholdA_Day_Form}
-                        ThresholdB_Day_Form={ThresholdB_Day_Form}
-                        ThresholdC_Day_Form={ThresholdC_Day_Form}
-                        ThresholdD_Day_Form={ThresholdD_Day_Form}
-                        ThresholdE_Day_Form={ThresholdE_Day_Form}
-                        ThresholdF_Day_Form={ThresholdF_Day_Form}
-                        ThresholdA_Week_Form={ThresholdA_Week_Form}
-                        ThresholdB_Week_Form={ThresholdB_Week_Form}
-                        ThresholdC_Week_Form={ThresholdC_Week_Form}
-                        ThresholdD_Week_Form={ThresholdD_Week_Form}
-                        ThresholdE_Week_Form={ThresholdE_Week_Form}
-                        ThresholdF_Week_Form={ThresholdF_Week_Form}
-                        ThresholdA_Month_Form={ThresholdA_Month_Form}
-                        ThresholdB_Month_Form={ThresholdB_Month_Form}
-                        ThresholdC_Month_Form={ThresholdC_Month_Form}
-                        ThresholdD_Month_Form={ThresholdD_Month_Form}
-                        ThresholdE_Month_Form={ThresholdE_Month_Form}
-                        ThresholdF_Month_Form={ThresholdF_Month_Form}
-                        prepareAndSaveDPESettingsMF={prepareAndSaveDPESettingsMF}
-                        grade={currentGrade}
-                        value={usineData.consoElec.toNumber()}
-                        period={activePeriod}
-                    />
-                </div>
-
-                {/* Cartes de consommation totale */}
-                <div className="grid-responsive-4">
-                    <CardConsoTotal
-                        title="Électricité"
-                        currentValue={usineData.consoElec}
-                        previousValue={usineData.consoElecPrec}
-                        unit="kWh"
-                        type="electricity"
-                    />
-                    <CardConsoTotal
-                        title="Gaz"
-                        currentValue={usineData.consoGaz}
-                        previousValue={usineData.consoGazPrec}
-                        unit="m³"
-                        type="gas"
-                    />
-                    <CardConsoTotal
-                        title="Eau"
-                        currentValue={usineData.consoEau}
-                        previousValue={usineData.consoEauPrec}
-                        unit="m³"
-                        type="water"
-                    />
-                    <CardConsoTotal
-                        title="Air"
-                        currentValue={usineData.consoAir}
-                        previousValue={usineData.consoAirPrec}
-                        unit="m³"
-                        type="air"
-                    />
-                </div>
-
-                {/* Cartes de secteur */}
-                <div className="grid-responsive-2">
-                    {secteursData.map((secteur, index) => (
-                        <SecteurConsoCard
-                            key={index}
-                            name={secteur.name}
-                            consoElec={secteur.consoElec}
-                            consoGaz={secteur.consoGaz}
-                            consoEau={secteur.consoEau}
-                            consoAir={secteur.consoAir}
-                            consoElecPrec={secteur.consoElecPrec}
-                            consoGazPrec={secteur.consoGazPrec}
-                            consoEauPrec={secteur.consoEauPrec}
-                            consoAirPrec={secteur.consoAirPrec}
+        <MantineProvider>
+            <React.Fragment>
+                {/* LoadingOverlay positioned outside the main content flow */}
+                <LoadingOverlay isLoading={isLoading} message={message} />
+                
+                {/* Main content */}
+                <div className="syntheseWidget-root max-w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 font-sans space-y-6 sm:space-y-8 lg:space-y-10">
+                    {/* Date controls */}
+                    <div>
+                        <DateRangeSelector
+                            onClickDay={() => handleDateRangeChange('day')}
+                            onClickWeek={() => handleDateRangeChange('week')}
+                            onClickMonth={() => handleDateRangeChange('month')}
+                            activeButton={activePeriod}
+                            dateDebut={dateDebut.value}
+                            dateFin={dateFin.value}
                         />
-                    ))}
-                </div>
+                    </div>
 
-                {/* Graphiques de consommation par secteur */}
-                <div className="grid-responsive-2">
-                    <ColumnChart
-                        data={secteursData}
-                        title="Consommation Électricité par Secteur"
-                        type="elec"
-                        onClickSecteur={(secteurName) => handleSecteurElecClick(secteurName)}
-                    />
-                    <ColumnChart
-                        data={secteursData}
-                        title="Consommation Gaz par Secteur"
-                        type="gaz"
-                        onClickSecteur={(secteurName) => handleSecteurGazClick(secteurName)}
-                    />
-                </div>
+                    {/* DPE */}
+                    <div>
+                        <DPE
+                            dsDPESettings={dsDPESettings}
+                            ThresholdA_Day={ThresholdA_Day}
+                            ThresholdB_Day={ThresholdB_Day}
+                            ThresholdC_Day={ThresholdC_Day}
+                            ThresholdD_Day={ThresholdD_Day}
+                            ThresholdE_Day={ThresholdE_Day}
+                            ThresholdF_Day={ThresholdF_Day}
+                            ThresholdA_Week={ThresholdA_Week}
+                            ThresholdB_Week={ThresholdB_Week}
+                            ThresholdC_Week={ThresholdC_Week}
+                            ThresholdD_Week={ThresholdD_Week}
+                            ThresholdE_Week={ThresholdE_Week}
+                            ThresholdF_Week={ThresholdF_Week}
+                            ThresholdA_Month={ThresholdA_Month}
+                            ThresholdB_Month={ThresholdB_Month}
+                            ThresholdC_Month={ThresholdC_Month}
+                            ThresholdD_Month={ThresholdD_Month}
+                            ThresholdE_Month={ThresholdE_Month}
+                            ThresholdF_Month={ThresholdF_Month}
+                            ThresholdA_Day_Form={ThresholdA_Day_Form}
+                            ThresholdB_Day_Form={ThresholdB_Day_Form}
+                            ThresholdC_Day_Form={ThresholdC_Day_Form}
+                            ThresholdD_Day_Form={ThresholdD_Day_Form}
+                            ThresholdE_Day_Form={ThresholdE_Day_Form}
+                            ThresholdF_Day_Form={ThresholdF_Day_Form}
+                            ThresholdA_Week_Form={ThresholdA_Week_Form}
+                            ThresholdB_Week_Form={ThresholdB_Week_Form}
+                            ThresholdC_Week_Form={ThresholdC_Week_Form}
+                            ThresholdD_Week_Form={ThresholdD_Week_Form}
+                            ThresholdE_Week_Form={ThresholdE_Week_Form}
+                            ThresholdF_Week_Form={ThresholdF_Week_Form}
+                            ThresholdA_Month_Form={ThresholdA_Month_Form}
+                            ThresholdB_Month_Form={ThresholdB_Month_Form}
+                            ThresholdC_Month_Form={ThresholdC_Month_Form}
+                            ThresholdD_Month_Form={ThresholdD_Month_Form}
+                            ThresholdE_Month_Form={ThresholdE_Month_Form}
+                            ThresholdF_Month_Form={ThresholdF_Month_Form}
+                            prepareAndSaveDPESettingsMF={prepareAndSaveDPESettingsMF}
+                            grade={currentGrade}
+                            value={usineData.consoElec.toNumber()}
+                            period={activePeriod}
+                        />
+                    </div>
 
-                <div className="grid-responsive-2">
-                    <ColumnChart
-                        data={secteursData}
-                        title="Consommation Eau par Secteur"
-                        type="eau"
-                        onClickSecteur={(secteurName) => handleSecteurEauClick(secteurName)}
-                    />
-                    <ColumnChart
-                        data={secteursData}
-                        title="Consommation Air par Secteur"
-                        type="air"
-                        onClickSecteur={(secteurName) => handleSecteurAirClick(secteurName)}
-                    />
+                    {/* Cartes de consommation totale */}
+                    <div className="grid-responsive-4">
+                        <CardConsoTotal
+                            title="Électricité"
+                            currentValue={usineData.consoElec}
+                            previousValue={usineData.consoElecPrec}
+                            unit="kWh"
+                            type="electricity"
+                        />
+                        <CardConsoTotal
+                            title="Gaz"
+                            currentValue={usineData.consoGaz}
+                            previousValue={usineData.consoGazPrec}
+                            unit="m³"
+                            type="gas"
+                        />
+                        <CardConsoTotal
+                            title="Eau"
+                            currentValue={usineData.consoEau}
+                            previousValue={usineData.consoEauPrec}
+                            unit="m³"
+                            type="water"
+                        />
+                        <CardConsoTotal
+                            title="Air"
+                            currentValue={usineData.consoAir}
+                            previousValue={usineData.consoAirPrec}
+                            unit="m³"
+                            type="air"
+                        />
+                    </div>
+
+                    {/* Cartes de secteur */}
+                    <div className="grid-responsive-2">
+                        {secteursData.map((secteur, index) => (
+                            <SecteurConsoCard
+                                key={index}
+                                name={secteur.name}
+                                consoElec={secteur.consoElec}
+                                consoGaz={secteur.consoGaz}
+                                consoEau={secteur.consoEau}
+                                consoAir={secteur.consoAir}
+                                consoElecPrec={secteur.consoElecPrec}
+                                consoGazPrec={secteur.consoGazPrec}
+                                consoEauPrec={secteur.consoEauPrec}
+                                consoAirPrec={secteur.consoAirPrec}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Graphiques de consommation par secteur */}
+                    <div className="grid-responsive-2">
+                        <ColumnChart
+                            data={secteursData}
+                            title="Consommation Électricité par Secteur"
+                            type="elec"
+                            onClickSecteur={(secteurName) => handleSecteurElecClick(secteurName)}
+                        />
+                        <ColumnChart
+                            data={secteursData}
+                            title="Consommation Gaz par Secteur"
+                            type="gaz"
+                            onClickSecteur={(secteurName) => handleSecteurGazClick(secteurName)}
+                        />
+                    </div>
+
+                    <div className="grid-responsive-2">
+                        <ColumnChart
+                            data={secteursData}
+                            title="Consommation Eau par Secteur"
+                            type="eau"
+                            onClickSecteur={(secteurName) => handleSecteurEauClick(secteurName)}
+                        />
+                        <ColumnChart
+                            data={secteursData}
+                            title="Consommation Air par Secteur"
+                            type="air"
+                            onClickSecteur={(secteurName) => handleSecteurAirClick(secteurName)}
+                        />
+                    </div>
                 </div>
-            </div>
-        </React.Fragment>
+            </React.Fragment>
+        </MantineProvider>
     );
 };
